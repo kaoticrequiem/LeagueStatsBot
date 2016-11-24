@@ -10,8 +10,8 @@ import csv
 
 def main(argv):
 	# Arguments
-	parser = argparse.ArgumentParser(description="Log Analysis Script")
-	parser.add_argument("-o", default = "log_run.csv", help="Optional output file.")
+	parser = argparse.ArgumentParser(description="Stats Generation Bot")
+	parser.add_argument("-o", default = "stats.csv", help="Optional output file.")
    	args = parser.parse_args()
         
     # Read the config file
@@ -19,13 +19,13 @@ def main(argv):
 	config.read('config.ini')
 	api_key = config.get('main','apiKey')   
 
-	io = "inv_"+args.o
-   	inv_outfile = open(io, "w")
+	io = args.o
+   	outfile = open(io, "ab+")
 
 	# Build .csv
-	data = csv.writer(inv_outfile, quotechar='"', delimiter=',', dialect='excel',
+	data = csv.writer(outfile, quotechar='"', delimiter=',', dialect='excel',
 		quoting=csv.QUOTE_MINIMAL, skipinitialspace=True)
-	header = ["Total Damage", "Game Created"]
+	header = ["Total Damage", "Game Created", "Game ID"]
 	data.writerow(header)
 
 	retrieve_stats = requests.get('https://na.api.pvp.net/api/lol/na/v1.3/stats/by-summoner/23928317/ranked?season=SEASON2016&api_key=' + api_key)
@@ -57,15 +57,17 @@ def main(argv):
 		games_stats_json = retrieve_game_stats.json()
 		total_damage = []
 		create_date = []
+		game_id = []
 		#print "The URL for the request is %s" % str('https://na.api.pvp.net/api/lol/na/v1.3/game/by-summoner/23928317/recent?&api_key=' + api_key)
 		for champion in games_stats_json['games']:
 			total_damage = champion['stats']['totalDamageDealt']
 			create_date = champion['createDate']
+			game_id = champion['gameId']
 			human_time = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(create_date / 1000))
 			human_time = str((human_time) + " UTC")
 			time_played = long((champion['stats']['timePlayed']) / 60)
 			winner_winner = champion['stats']['win']
-			if total_damage != 0:
+			'''if total_damage != 0:
 				iteration = iteration + 1
 				print "The total damage is " + str(total_damage)
 				print "The time this game was created in human terms is " + human_time
@@ -76,9 +78,15 @@ def main(argv):
 			if winner_winner:
 				print "You won this game!"
 			else:
-				print "You lost this game. :("
-			output = [total_damage, human_time]
+				print "You lost this game. :(" '''
+			output = [total_damage, human_time, game_id]
 			data.writerow(output)
+			'''
+			print rowscan
+			print table
+			for row in rowscan:
+				print "Testing to see if we're in loop."
+				break'''
 	else:
 		print "Something went wrong!"
 
